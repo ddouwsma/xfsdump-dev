@@ -4332,7 +4332,6 @@ init_extent_group_context(jdm_fshandle_t *fshandlep,
 	gcp->eg_bmap[0].bmv_offset = 0;
 	gcp->eg_bmap[0].bmv_length = -1;
 	gcp->eg_bmap[0].bmv_count = BMAP_LEN;
-	gcp->eg_bmap[0].bmv_iflags = BMV_IF_NO_DMAPI_READ;
 	gcp->eg_nextbmapp = &gcp->eg_bmap[1];
 	gcp->eg_endbmapp = &gcp->eg_bmap[1];
 	gcp->eg_bmapix = 0;

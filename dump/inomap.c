@@ -1627,7 +1627,7 @@ static off64_t
 quantity2offset(jdm_fshandle_t *fshandlep, struct xfs_bstat *statp, off64_t qty)
 {
 	int fd;
-	getbmapx_t bmap[BMAP_LEN];
+	struct getbmap bmap[BMAP_LEN];
 	off64_t offset;
 	off64_t offset_next;
 	off64_t qty_accum;
@@ -1647,7 +1647,6 @@ quantity2offset(jdm_fshandle_t *fshandlep, struct xfs_bstat *statp, off64_t qty)
 	bmap[0].bmv_offset = 0;
 	bmap[0].bmv_length = -1;
 	bmap[0].bmv_count = BMAP_LEN;
-	bmap[0].bmv_iflags = BMV_IF_NO_DMAPI_READ;
 	bmap[0].bmv_entries = -1;
 	fd = jdm_open(fshandlep, statp, O_RDONLY);
 	if (fd < 0) {
@@ -1662,7 +1661,7 @@ quantity2offset(jdm_fshandle_t *fshandlep, struct xfs_bstat *statp, off64_t qty)
 		int eix;
 		int rval;
 
-		rval = ioctl(fd, XFS_IOC_GETBMAPX, bmap);
+		rval = ioctl(fd, XFS_IOC_GETBMAP, bmap);
 		if (rval) {
 			mlog(MLOG_NORMAL | MLOG_WARNING | MLOG_INOMAP, _(
 			      "could not read extent map for ino %llu: %s\n"),
@@ -1679,7 +1678,7 @@ quantity2offset(jdm_fshandle_t *fshandlep, struct xfs_bstat *statp, off64_t qty)
 		}
 
 		for (eix = 1; eix <= bmap[0].bmv_entries; eix++) {
-			getbmapx_t *bmapp = &bmap[eix];
+			struct getbmap *bmapp = &bmap[eix];
 			off64_t qty_new;
 			if (bmapp->bmv_block == -1) {
 				continue; /* hole */
