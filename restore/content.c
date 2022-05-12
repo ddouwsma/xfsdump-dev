@@ -5073,6 +5073,7 @@ pi_insertfile(ix_t drivecnt,
 		strncpy(DH2O(objh)->o_lab,
 			 medialabel,
 			 sizeof(DH2O(objh)->o_lab));
+		DH2O(objh)->o_lab[sizeof(DH2O(objh)->o_lab) - 1] = '\0';
 		DH2O(objh)->o_idlabvalpr = BOOL_TRUE;
 	}
 	if (mfixvalpr
@@ -5103,6 +5104,7 @@ pi_insertfile(ix_t drivecnt,
 		strncpy(DH2O(prevobjh)->o_lab,
 			       prevmedialabel,
 			       sizeof(DH2O(prevobjh)->o_lab));
+		DH2O(prevobjh)->o_lab[sizeof(DH2O(prevobjh)->o_lab) - 1] = '\0';
 		DH2O(prevobjh)->o_idlabvalpr = BOOL_TRUE;
 	}
 
@@ -6738,6 +6740,7 @@ addobj(bag_t *bagp,
 	strncpy(bagobjp->label,
 		 label,
 		 sizeof(bagobjp->label));
+	bagobjp->label[sizeof(bagobjp->label) - 1] = '\0';
 	bagobjp->indrivepr = indrivepr;
 	bagobjp->indriveix = indriveix;
 	bag_insert(bagp,
