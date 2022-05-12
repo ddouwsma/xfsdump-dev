@@ -234,6 +234,7 @@ do_rmt:
 		}
 		else {
 		    strncpy(rmt_cmd, rmt_path, sizeof(rmt_cmd));
+		    rmt_cmd[sizeof(rmt_cmd) - 1] = '\0';
 		}
 		if (strlen(login))
 		{
