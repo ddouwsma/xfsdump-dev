@@ -149,7 +149,7 @@ fstab_select(WINDOW *win, node_t *current, node_t *list)
 int
 fstab_highlight(WINDOW *win, node_t *current, node_t *list)
 {
-    static char txt[256];
+    static char txt[9 + INV_STRLEN];
     char uuidstr[UUID_STR_LEN + 1];
     data_t *d;
     invt_fstab_t *fstabentry;

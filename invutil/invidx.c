@@ -115,7 +115,7 @@ invidx_commit(WINDOW *win, node_t *current, node_t *list)
 	struct stat s;
 	char dst_stobjfile[MAXPATHLEN];
 	char *stobjfile;
-	char cmd[1024];
+	char cmd[5 + MAXPATHLEN * 2];
 
 	snprintf(dst_idxfile, sizeof(dst_idxfile), "%s/%s", inventory_path, basename(invidx_file[fidx].name));
 
@@ -688,7 +688,7 @@ invidx_select(WINDOW *win, node_t *current, node_t *list)
 int
 invidx_highlight(WINDOW *win, node_t *current, node_t *list)
 {
-    static char txt[256];
+    static char txt[10 + INV_STRLEN];
     data_t *d;
     invt_entry_t *invtentry;
 
@@ -706,11 +706,9 @@ invidx_highlight(WINDOW *win, node_t *current, node_t *list)
     put_info_line(1, txt);
 
     snprintf(txt, sizeof(txt), "start: %s", ctime32(&invtentry->ie_timeperiod.tp_start));
-    txt[strlen(txt) - 1] = '\0';
     put_info_line(2, txt);
 
     snprintf(txt, sizeof(txt), "end:   %s", ctime32(&invtentry->ie_timeperiod.tp_end));
-    txt[strlen(txt) - 1] = '\0';
     put_info_line(3, txt);
 
     return FALSE;

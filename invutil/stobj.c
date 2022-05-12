@@ -171,7 +171,7 @@ stobjsess_commit(WINDOW *win, node_t *current, node_t *list)
 int
 stobjsess_highlight(WINDOW *win, node_t *current, node_t *list)
 {
-    static char txt[256];
+    static char txt[20 + INV_STRLEN + UUID_STR_LEN];
     char uuidstr[UUID_STR_LEN + 1];
     data_t *d;
     invt_seshdr_t *stobjhdr;
@@ -210,7 +210,7 @@ stobjsess_highlight(WINDOW *win, node_t *current, node_t *list)
 int
 stobjstrm_highlight(WINDOW *win, node_t *current, node_t *list)
 {
-    static char txt[256];
+    static char txt[30 + INV_STRLEN];
     data_t *d;
     invt_stream_t *stobjstrm;
 
