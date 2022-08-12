@@ -1327,8 +1327,8 @@ msgid "lock ordinal violation: tid %lu ord %d map %x\n"
 msgstr "naruszenie porządku blokad: tid %lu ord %d map %x\n"
 
 #: .././common/ring.c:127
-msgid "slave"
-msgstr "podrzędnego"
+msgid "worker"
+msgstr ""
 
 #: .././common/util.c:188 .././dump/content.c:2867
 #, c-format

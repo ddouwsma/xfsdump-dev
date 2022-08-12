@@ -446,8 +446,8 @@ msgstr ""
 "zurück, Fehlernummer %d (%s)\n"
 
 #: .././common/drive_minrmt.c:3823
-msgid "slave"
-msgstr "Slave"
+msgid "worker"
+msgstr "worker"
 
 #: .././common/drive_minrmt.c:3891 .././common/drive_minrmt.c:3899
 msgid "KB"
