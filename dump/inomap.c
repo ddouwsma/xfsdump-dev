@@ -1627,7 +1627,7 @@ static off64_t
 quantity2offset(jdm_fshandle_t *fshandlep, struct xfs_bstat *statp, off64_t qty)
 {
 	int fd;
-	struct getbmap bmap[BMAP_LEN];
+	struct getbmap bmap[BMAP_LEN] = {0};
 	off64_t offset;
 	off64_t offset_next;
 	off64_t qty_accum;
