@@ -1,3 +1,12 @@
+xfsdump (3.1.11) unstable; urgency=low
+
+  * New upstream release
+  * Remove remaining slave words from documentation
+  * Remove DMAPI remaining code
+  * Fix FTBFS error
+
+ -- Nathan Scott <nathans@debian.org>  Thu, 25 Aug 2022 10:44:06 +0200
+
 xfsdump (3.1.10) unstable; urgency=low
 
   * New upstream release
