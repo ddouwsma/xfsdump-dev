@@ -15,7 +15,6 @@
  * along with this program; if not, write the Free Software Foundation,
  * Inc.,  51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  */
-
 #include <stdio.h>
 #include <unistd.h>
 #include <stdlib.h>
@@ -262,6 +261,7 @@ extern void usage(void);
 extern size_t pgsz;
 extern size_t pgmask;
 extern bool_t restore_rootdir_permissions;
+extern bool_t need_fixrootdir;
 
 /* forward declarations of locally defined static functions ******************/
 
@@ -328,9 +328,46 @@ static tran_t *tranp = 0;
 static char *persname = PERS_NAME;
 static char *orphname = ORPH_NAME;
 static xfs_ino_t orphino = ORPH_INO;
+static nh_t orig_rooth = NH_NULL;
 
 
 /* definition of locally defined global functions ****************************/
+
+void
+tree_fixroot(void)
+{
+	nh_t		rooth = persp->p_rooth;
+	xfs_ino_t 	rootino;
+
+	while (1) {
+		nh_t	parh;
+		node_t *rootp = Node_map(rooth);
+
+		rootino = rootp->n_ino;
+		parh = rootp->n_parh;
+		Node_unmap(rooth, &rootp);
+
+		if (parh == rooth ||
+		/*
+		 * since all new node (including non-parent)
+		 * would be adopted into orphh
+		 */
+		    parh == persp->p_orphh ||
+		    parh == NH_NULL)
+			break;
+		rooth = parh;
+	}
+
+	if (rooth != persp->p_rooth) {
+		persp->p_rooth = rooth;
+		persp->p_rootino = rootino;
+		disown(rooth);
+		adopt(persp->p_rooth, persp->p_orphh, NH_NULL);
+
+		mlog(MLOG_NORMAL, _("fix root # to %llu (bind mount?)\n"),
+		     rootino);
+	}
+}
 
 /* ARGSUSED */
 bool_t
@@ -746,7 +783,8 @@ tree_begindir(filehdr_t *fhdrp, dah_t *dahp)
 	/* lookup head of hardlink list
 	 */
 	hardh = link_hardh(ino, gen);
-	assert(ino != persp->p_rootino || hardh == persp->p_rooth);
+	if (need_fixrootdir == BOOL_FALSE)
+		assert(ino != persp->p_rootino || hardh == persp->p_rooth);
 
 	/* already present
 	 */
@@ -815,7 +853,6 @@ tree_begindir(filehdr_t *fhdrp, dah_t *dahp)
 		adopt(persp->p_orphh, hardh, NRH_NULL);
 		*dahp = dah;
 	}
-
 	return hardh;
 }
 
@@ -960,6 +997,7 @@ tree_addent(nh_t parh, xfs_ino_t ino, gen_t gen, char *name, size_t namelen)
 				}
 			} else {
 				assert(hardp->n_nrh != NRH_NULL);
+
 				namebuflen
 				=
 				namreg_get(hardp->n_nrh,
@@ -1109,6 +1147,13 @@ tree_addent(nh_t parh, xfs_ino_t ino, gen_t gen, char *name, size_t namelen)
 		      name,
 		      ino,
 		      gen);
+	}
+	/* found the fake rootino from subdir, need fix p_rooth. */
+	if (need_fixrootdir == BOOL_TRUE &&
+	    persp->p_rootino == ino && hardh != persp->p_rooth) {
+		mlog(MLOG_NORMAL,
+		     _("found fake rootino #%llu, will fix.\n"), ino);
+		persp->p_rooth = hardh;
 	}
 	return RV_OK;
 }
@@ -3808,7 +3853,26 @@ selsubtree_recurse_down(nh_t nh, bool_t sensepr)
 static nh_t
 link_hardh(xfs_ino_t ino, gen_t gen)
 {
-	return hash_find(ino, gen);
+	nh_t tmp = hash_find(ino, gen);
+
+	/*
+	 * XXX (another workaround): the simply way is that don't reuse node_t
+	 * with gen = 0 created in tree_init(). Otherwise, it could cause
+	 * xfsrestore: tree.c:1003: tree_addent: Assertion
+	 * `hardp->n_nrh != NRH_NULL' failed.
+	 * and that node_t is a dir node but the fake rootino could be a non-dir
+	 * plus reusing it could cause potential loop in tree hierarchy.
+	 */
+	if (need_fixrootdir == BOOL_TRUE &&
+	    ino == persp->p_rootino && gen == 0 &&
+	    orig_rooth == NH_NULL) {
+		mlog(MLOG_NORMAL,
+_("link out fake rootino %llu with gen=0 created in tree_init()\n"), ino);
+		link_out(tmp);
+		orig_rooth = tmp;
+		return NH_NULL;
+	}
+	return tmp;
 }
 
 /* returns following node in hard link list

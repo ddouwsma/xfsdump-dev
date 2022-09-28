@@ -240,6 +240,20 @@ but does not create or modify any files or directories.
 It may be desirable to set the verbosity level to \f3silent\f1
 when using this option.
 .TP 5
+.B \-x
+This option may be useful to fix an issue which the files are restored
+to orphanage directory because of xfsdump (v3.1.7 - v3.1.9) problem.
+A normal dump cannot be restored with this option. This option works
+only for a corrupted dump.
+If a dump is created by problematic xfsdump (v3.1.7 - v3.1.9), you
+should see the contents of the dump with \f3\-t\f1 option before
+restoring. Then, if a file is placed to the orphanage directory, you need to
+use this \f3\-x\f1 option to restore the dump. Otherwise, you can restore
+the dump without this option.
+
+In the cumulative mode, this option is required only for a base (level 0)
+dump. You no longer need this option for level 1+ dumps.
+.TP 5
 \f3\-v\f1 \f2verbosity\f1
 .\" set inter-paragraph distance to 0
 .PD 0

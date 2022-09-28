@@ -988,6 +988,7 @@ usage(void)
 	ULO(_("(contents only)"),			GETOPT_TOC);
 	ULO(_("<verbosity {silent, verbose, trace}>"),	GETOPT_VERBOSITY);
 	ULO(_("(use small tree window)"),		GETOPT_SMALLWINDOW);
+	ULO(_("(try to fix rootdir due to xfsdump issue)"),GETOPT_FIXROOTDIR);
 	ULO(_("(don't restore extended file attributes)"), GETOPT_NOEXTATTR);
 	ULO(_("(restore root dir owner/permissions)"),	GETOPT_ROOTPERM);
 	ULO(_("(restore DMAPI event settings)"),	GETOPT_SETDM);

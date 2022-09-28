@@ -26,7 +26,7 @@
  * purpose is to contain that command string.
  */
 
-#define GETOPT_CMDSTRING	"a:b:c:def:himn:op:qrs:tv:wABCDEFG:H:I:JKL:M:NO:PQRS:TUVWX:Y:"
+#define GETOPT_CMDSTRING	"a:b:c:def:himn:op:qrs:tv:wxABCDEFG:H:I:JKL:M:NO:PQRS:TUVWX:Y:"
 
 #define GETOPT_WORKSPACE	'a'	/* workspace dir (content.c) */
 #define GETOPT_BLOCKSIZE        'b'     /* blocksize for rmt */
@@ -51,7 +51,7 @@
 /*				'u' */
 #define	GETOPT_VERBOSITY	'v'	/* verbosity level (0 to 4) */
 #define	GETOPT_SMALLWINDOW	'w'	/* use a small window for dir entries */
-/*				'x' */
+#define GETOPT_FIXROOTDIR	'x'	/* try to fix rootdir due to bulkstat misuse */
 /*				'y' */
 /*				'z' */
 #define	GETOPT_NOEXTATTR	'A'	/* do not restore ext. file attr. */

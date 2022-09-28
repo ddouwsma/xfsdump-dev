@@ -861,6 +861,7 @@ static int quotafilecheck(char *type, char *dstdir, char *quotafile);
 
 bool_t content_media_change_needed;
 bool_t restore_rootdir_permissions;
+bool_t need_fixrootdir;
 char *media_change_alert_program = NULL;
 size_t perssz;
 
@@ -958,6 +959,7 @@ content_init(int argc, char *argv[], size64_t vmsz)
 	stsz = 0;
 	interpr = BOOL_FALSE;
 	restore_rootdir_permissions = BOOL_FALSE;
+	need_fixrootdir = BOOL_FALSE;
 	optind = 1;
 	opterr = 0;
 	while ((c = getopt(argc, argv, GETOPT_CMDSTRING)) != EOF) {
@@ -1185,6 +1187,9 @@ content_init(int argc, char *argv[], size64_t vmsz)
 			break;
 		case GETOPT_FMT2COMPAT:
 			tranp->t_truncategenpr = BOOL_TRUE;
+			break;
+		case GETOPT_FIXROOTDIR:
+			need_fixrootdir = BOOL_TRUE;
 			break;
 		}
 	}
@@ -3129,6 +3134,8 @@ applydirdump(drive_t *drivep,
 			return rv;
 		}
 
+		if (need_fixrootdir)
+			tree_fixroot();
 		persp->s.dirdonepr = BOOL_TRUE;
 	}
 

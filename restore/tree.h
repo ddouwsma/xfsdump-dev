@@ -18,6 +18,8 @@
 #ifndef TREE_H
 #define TREE_H
 
+void tree_fixroot(void);
+
 /* tree_init - creates a new tree abstraction.
  */
 extern bool_t tree_init(char *hkdir,
