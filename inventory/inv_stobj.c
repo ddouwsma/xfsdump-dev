@@ -798,7 +798,7 @@ stobj_pack_sessinfo(int fd, invt_session_t *ses, invt_seshdr_t *hdr,
 	sesbuf += sizeof(invt_session_t);
 
 	for (i = 0; i < ses->s_cur_nstreams; i++) {
-		xlate_invt_stream(strms, (invt_stream_t *)sesbuf, 1);
+		xlate_invt_stream(&strms[i], (invt_stream_t *)sesbuf, 1);
 		sesbuf += sizeof(invt_stream_t);
 	}
 
