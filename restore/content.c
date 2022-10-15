@@ -8672,7 +8672,6 @@ restore_extattr(drive_t *drivep,
 {
 	drive_ops_t *dop = drivep->d_opsp;
 	extattrhdr_t *ahdrp = (extattrhdr_t *)get_extattrbuf(drivep->d_index);
-	stream_context_t *strctxp = (stream_context_t *)drivep->d_strmcontextp;
 	bstat_t *bstatp = &fhdrp->fh_stat;
 	bool_t isfilerestored = BOOL_FALSE;
 
