@@ -24,6 +24,8 @@
 #include <sys/param.h>
 #include <sys/stat.h>
 #include <sys/ioctl.h>
+#include <sys/xattr.h>
+#include <linux/xattr.h>
 #include <attr/attributes.h>
 #include <xfs/handle.h>
 #include <time.h>
@@ -8783,7 +8785,7 @@ setextattr(char *path, extattrhdr_t *ahdrp)
 	bool_t isrootpr = ahdrp->ah_flags & EXTATTRHDR_FLAGS_ROOT;
 	bool_t issecurepr = ahdrp->ah_flags & EXTATTRHDR_FLAGS_SECURE;
 	bool_t isdmpr;
-	int attr_namespace;
+	char name[XATTR_NAME_MAX];
 	int rval;
 
 	isdmpr = (isrootpr &&
@@ -8796,21 +8798,21 @@ setextattr(char *path, extattrhdr_t *ahdrp)
 		return;
 
 	if (isrootpr) {
-		attr_namespace = ATTR_ROOT;
+		snprintf(name, sizeof(name), XATTR_TRUSTED_PREFIX"%s",
+			 (char *)(&ahdrp[1]));
 	} else if (issecurepr) {
-		attr_namespace = ATTR_SECURE;
+		snprintf(name, sizeof(name), XATTR_SECURITY_PREFIX"%s",
+			 (char *)(&ahdrp[1]));
 	} else {
-		attr_namespace = 0;
+		snprintf(name, sizeof(name), XATTR_USER_PREFIX"%s",
+			 (char *)(&ahdrp[1]));
 	}
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
-	rval = attr_set(path,
-			 (char *)(&ahdrp[1]),
+	rval = setxattr(path,
+			 name,
 			 ((char *)ahdrp) + (u_long_t)ahdrp->ah_valoff,
 			 (int)ahdrp->ah_valsz,
-			 attr_namespace | ATTR_DONTFOLLOW);
-#pragma GCC diagnostic pop
+			 ATTR_DONTFOLLOW);
 	if (rval) {
 		char *namespace;
 		if (isrootpr) {
