@@ -26,6 +26,8 @@
 #include <assert.h>
 #include <uuid/uuid.h>
 #include <attr/attributes.h>
+#include <sys/xattr.h>
+#include <linux/xattr.h>
 #include <xfs/xfs.h>
 #include <xfs/jdm.h>
 
@@ -799,14 +801,11 @@ HsmBeginRestoreFile(
 		dmattr.fsys = FSYS_TYPE_XFS;
 		msb_store(dmattr.state, DMF_ST_NOMIGR, sizeof(dmattr.state));
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
-		rv = attr_setf(fd,
-			       DMF_ATTR_NAME,
+		rv = fsetxattr(fd,
+			       XATTR_TRUSTED_PREFIX DMF_ATTR_NAME,
 			       (char *)&dmattr,
 			       sizeof(dmattr),
-			       ATTR_ROOT);
-#pragma GCC diagnostic pop
+			       0);
 		if (rv == 0)
 			*hsm_flagp = 1;
 	}
@@ -874,10 +873,7 @@ HsmEndRestoreFile(
 	 */
 	if (*hsm_flagp) {
 		int rv;
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
-		rv = attr_removef(fd, DMF_ATTR_NAME, ATTR_ROOT);
-#pragma GCC diagnostic pop
+		rv = fremovexattr(fd, DMF_ATTR_NAME);
 		if (rv) {
 			mlog(MLOG_NORMAL | MLOG_WARNING,
 			     _("error removing temp DMF attr on %s: %s\n"),
