@@ -1,3 +1,6 @@
+xfsdump-3-1.12 (15 Dec 2022)
+	- Fix inventory unpacking (Donald Douwsma)
+
 xfsdump-3-1.11 (25 Aug 2022)
 
 	- Remove remaining slave words from documentation
