@@ -255,13 +255,11 @@ do_rmt:
 		}
 		if (strlen(login))
 		{
-			execl(rsh_path, "rsh", system, "-l", login,
-				rmt_cmd, (char *) 0);
+			execl(rsh_path, system, "-l", login, rmt_cmd, NULL);
 		}
 		else
 		{
-			execl(rsh_path, "rsh", system,
-				rmt_cmd, (char *) 0);
+			execl(rsh_path, system, rmt_cmd, NULL);
 		}
 
 /*
