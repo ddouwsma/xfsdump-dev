@@ -783,8 +783,15 @@ tree_begindir(filehdr_t *fhdrp, dah_t *dahp)
 	/* lookup head of hardlink list
 	 */
 	hardh = link_hardh(ino, gen);
-	if (need_fixrootdir == BOOL_FALSE)
-		assert(ino != persp->p_rootino || hardh == persp->p_rooth);
+	if (need_fixrootdir == BOOL_FALSE &&
+	    !(ino != persp->p_rootino || hardh == persp->p_rooth)) {
+		mlog(MLOG_ERROR | MLOG_TREE,
+"%s:%d: %s: Assertion `ino != persp->p_rootino || hardh == persp->p_rooth` failed.\n",
+			__FILE__, __LINE__, __func__);
+		mlog(MLOG_ERROR | MLOG_TREE, _(
+"False root detected. Recovery may be possible using the `-x` option\n"));
+		return NH_NULL;
+	}
 
 	/* already present
 	 */
