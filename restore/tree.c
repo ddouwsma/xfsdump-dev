@@ -4977,9 +4977,22 @@ static int
 mkdir_r(char *path)
 {
 	struct stat sbuf;
+	char *path_copy;
+	int ret;
 
 	if (stat(path, &sbuf) < 0) {
-		if (mkdir_r(dirname(strdup(path))) < 0)
+		path_copy = strdup(path);
+		if (!path_copy) {
+			mlog(MLOG_TRACE | MLOG_ERROR | MLOG_TREE,
+				_("unable to allocate memory for a path\n"));
+			mlog_exit(EXIT_ERROR, RV_ERROR);
+			exit(1);
+		}
+
+		ret = mkdir_r(dirname(path_copy));
+		free(path_copy);
+
+		if (ret < 0)
 			return -1;
 		return mkdir(path, 0755);
 	}
