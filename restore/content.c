@@ -7435,7 +7435,6 @@ restore_reg(drive_t *drivep,
 	int rval;
 	struct fsxattr fsxattr;
 	struct stat64 stat;
-	int oflags;
 
 	if (!path)
 		return BOOL_TRUE;
@@ -7470,11 +7469,7 @@ restore_reg(drive_t *drivep,
 	if (tranp->t_toconlypr)
 		return BOOL_TRUE;
 
-	oflags = O_CREAT | O_RDWR;
-	if (persp->a.dstdirisxfspr && bstatp->bs_xflags & XFS_XFLAG_REALTIME)
-		oflags |= O_DIRECT;
-
-	*fdp = open(path, oflags, S_IRUSR | S_IWUSR);
+	*fdp = open(path, O_CREAT | O_RDWR, S_IRUSR | S_IWUSR);
 	if (*fdp < 0) {
 		mlog(MLOG_NORMAL | MLOG_WARNING,
 		      _("open of %s failed: %s: discarding ino %llu\n"),
@@ -8392,8 +8387,6 @@ restore_extent(filehdr_t *fhdrp,
 	off64_t off = ehdrp->eh_offset;
 	off64_t sz = ehdrp->eh_sz;
 	off64_t new_off;
-	struct dioattr da;
-	bool_t isrealtime = BOOL_FALSE;
 
 	*bytesreadp = 0;
 
@@ -8417,18 +8410,6 @@ restore_extent(filehdr_t *fhdrp,
 			new_off = off;
 		}
 		assert(new_off == off);
-	}
-	if ((fd != -1) && (bstatp->bs_xflags & XFS_XFLAG_REALTIME)) {
-		if ((ioctl(fd, XFS_IOC_DIOINFO, &da) < 0)) {
-			mlog(MLOG_NORMAL | MLOG_WARNING, _(
-			      "dioinfo %s failed: "
-			      "%s: discarding ino %llu\n"),
-			      path,
-			      strerror(errno),
-			      fhdrp->fh_stat.bs_ino);
-			fd = -1;
-		} else
-			isrealtime = BOOL_TRUE;
 	}
 
 	/* move from media to fs.
@@ -8519,26 +8500,6 @@ restore_extent(filehdr_t *fhdrp,
 					assert(remaining
 						<=
 						(size_t)INTGENMAX);
-					/*
-					 * Realtime files must be written
-					 * to the end of the block even if
-					 * it has been truncated back.
-					 */
-					if (isrealtime &&
-					    (remaining % da.d_miniosz != 0 ||
-					     remaining < da.d_miniosz)) {
-						/*
-						 * Since the ring and static
-						 * buffers from the different
-						 * drives are always large, we
-						 * just need to write to the
-						 * end of the next block
-						 * boundry and truncate.
-						 */
-						rttrunc = remaining;
-						remaining += da.d_miniosz -
-						   (remaining % da.d_miniosz);
-					}
 					/*
 					 * Do the write. Due to delayed allocation
 					 * it's possible to receive false ENOSPC

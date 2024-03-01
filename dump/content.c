@@ -4319,15 +4319,8 @@ init_extent_group_context(jdm_fshandle_t *fshandlep,
 			   struct xfs_bstat *statp,
 			   extent_group_context_t *gcp)
 {
-	bool_t isrealtime;
-	int oflags;
 	struct flock fl;
 
-	isrealtime = (bool_t)(statp->bs_xflags & XFS_XFLAG_REALTIME);
-	oflags = O_RDONLY;
-	if (isrealtime) {
-		oflags |= O_DIRECT;
-	}
 	(void)memset((void *)gcp, 0, sizeof(*gcp));
 	gcp->eg_bmap[0].bmv_offset = 0;
 	gcp->eg_bmap[0].bmv_length = -1;
@@ -4336,7 +4329,7 @@ init_extent_group_context(jdm_fshandle_t *fshandlep,
 	gcp->eg_endbmapp = &gcp->eg_bmap[1];
 	gcp->eg_bmapix = 0;
 	gcp->eg_gbmcnt = 0;
-	gcp->eg_fd = jdm_open(fshandlep, statp, oflags);
+	gcp->eg_fd = jdm_open(fshandlep, statp, O_RDONLY);
 	if (gcp->eg_fd < 0) {
 		return RV_ERROR;
 	}
@@ -4387,7 +4380,6 @@ dump_extent_group(drive_t *drivep,
 		   off64_t *bytecntp,
 		   bool_t *cmpltflgp)
 {
-	struct dioattr da;
 	drive_ops_t *dop = drivep->d_opsp;
 	bool_t isrealtime = (bool_t)(statp->bs_xflags
 					&
@@ -4396,18 +4388,6 @@ dump_extent_group(drive_t *drivep,
 	off64_t bytecnt;	/* accumulates total bytes sent to media */
 	int rval;
 	rv_t rv;
-
-	/*
-	 * Setup realtime I/O size.
-	 */
-	if (isrealtime) {
-		if ((ioctl(gcp->eg_fd, XFS_IOC_DIOINFO, &da) < 0)) {
-			mlog(MLOG_NORMAL | MLOG_WARNING, _(
-			      "dioinfo failed ino %llu\n"),
-			      statp->bs_ino);
-			da.d_miniosz = PGSZ;
-		}
-	}
 
 	/* dump extents until the recommended extent length is achieved
 	 */
@@ -4677,17 +4657,13 @@ dump_extent_group(drive_t *drivep,
 		}
 		assert(extsz > 0);
 
-		/* if the resultant extent would put us over maxcnt,
-		 * shorten it, and round up to the next BBSIZE (round
-		 * upto d_miniosz for realtime).
+		/*
+		 * If the resultant extent would put us over maxcnt,
+		 * shorten it, and round up to the next BBSIZE.
 		 */
 		if (extsz > maxcnt - (bytecnt + sizeof(extenthdr_t))) {
-			int iosz;
+			int iosz = BBSIZE;
 
-			if (isrealtime)
-				iosz = da.d_miniosz;
-			else
-				iosz = BBSIZE;
 			extsz = maxcnt - (bytecnt + sizeof(extenthdr_t));
 			extsz = (extsz + (off64_t)(iosz - 1))
 				&
@@ -4723,18 +4699,14 @@ dump_extent_group(drive_t *drivep,
 			return RV_OK;
 		}
 
-		/* if the resultant extent extends beyond the end of the
+		/*
+		 * If the resultant extent extends beyond the end of the
 		 * file, shorten the extent to the nearest BBSIZE alignment
-		 * at or beyond EOF.  (Shorten to d_miniosz for realtime
-		 * files).
+		 * at or beyond EOF.
 		 */
 		if (extsz > statp->bs_size - offset) {
-			int iosz;
+			int iosz = BBSIZE;
 
-			if (isrealtime)
-				iosz = da.d_miniosz;
-			else
-				iosz = BBSIZE;
 			extsz = statp->bs_size - offset;
 			extsz = (extsz + (off64_t)(iosz - 1))
 				&
