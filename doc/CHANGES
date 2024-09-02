@@ -1,3 +1,9 @@
+xfsdump-3.2.0 (09 Sep 2024)
+	- don't use O_DIRECT on the RT device (Christoph Hellwig)
+	- Fix memory leak (Pavel Reichl)
+	- suggest -x rather than assert for false roots in restore (Donald Douwsma)
+	- fix rootdir due to xfsdump bulkstat misuse (Gao Xiang)
+
 xfsdump-3-1.12 (15 Dec 2022)
 	- Fix inventory unpacking (Donald Douwsma)
 
